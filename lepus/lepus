@@ -1,0 +1,69 @@
+#!/bin/bash
+
+basedir=""
+
+#check basedir
+#############################################################################
+if test -z "$basedir"
+then
+  basedir=/usr/local/lepus
+else
+  basedir="$basedir"
+fi
+
+arg=$1
+lepus_process=`ps -ef|grep lepus.py |grep -v grep|wc -l`
+case "$arg" in
+  'status')
+    #check lepus status
+    if [ $lepus_process -ge "2" ];then
+       echo "lepus server is running..."
+    else
+       echo "lepus server is not run!"
+    fi
+  ;;
+
+  'start')
+    #start lepus
+    if [ $lepus_process -ge "2" ];then
+       echo " lepus server is already run!"
+    else
+       cd $basedir && nohup  python lepus.py & > /dev/null 2>&1
+       sleep 15
+       lepus_process=`ps -ef|grep lepus.py |grep -v grep|wc -l`
+       if [ $lepus_process -ge "1" ];then
+          echo "lepus server start success!"
+	  #$(cat  /dev/null  > logs/lepus.log  && cat /dev/null >nohup.out )
+       else
+          echo "lepus server start fail!"
+       fi
+    fi
+  ;;
+
+  'stop')
+    #stop lepus
+    if [ $lepus_process -le "2" ];then
+       echo "lepus server is not running!"
+    else
+       ps -ef |grep -i -E "lepus.py"|grep -v -E "vi|vim|grep"|awk '{print $2}' |while read line; do kill $line; echo "lepus processes id $line been stop"; done 
+       ps -ef |grep -i -E "check_web.py"|grep -v -E "vi|vim|grep"|awk '{print $2}' |while read line; do kill  $line;done
+       #killall python lepus.py*
+    fi
+  ;;
+
+  '--help')
+    #for help
+    echo "lepus help:"
+    echo "support-site:  www.lepus.cc"
+    echo "===================================================================="
+    echo "start        Start lepus monitor server; Command: #lepus start"
+    echo "stop         Stop lepus monitor server; Command: #lepus stop"
+    echo "status       Check lepus monitor run status; Command: #lepus status"
+  ;;
+    *)
+        echo "Please input  --help to read the help info."
+    ;;
+
+esac
+
+exit 0  
