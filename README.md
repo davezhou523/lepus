@@ -3,11 +3,17 @@
 **2. WEB process number, process memory monitoring, TCP connection number monitoring, PV, UV, IP value statistics, web error log timely reminder**
 ### Process
 ![flow chart](./doc/flowChart.png)
+
 ![Web_visit_statistics](./doc/Web_visit_statistics.png)
+
 ![Web connection status monitoring](./doc/Web connection status monitoring.png)
+
 ![Web configuration interface](./doc/Web configuration interface.png)
+
 ![Web error log reminder](./doc/Web error log reminder.png)
+
 ![Operating system configuration interface](./doc/Operating system configuration interface.png)
+
 ### Development environment required:
 centos7+php5.6+mysql5.6+apache+python2.7
 
