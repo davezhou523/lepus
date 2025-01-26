@@ -3,3 +3,4 @@ web/application/config/database.php
 web/application/config/config.php
 *.out
 *.log
+.idea
