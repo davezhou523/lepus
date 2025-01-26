@@ -6,13 +6,13 @@
 
 ![Web_visit_statistics](./doc/Web_visit_statistics.png)
 
-![Web connection status monitoring](./doc/Web connection status monitoring.png)
+![Web connection status monitoring](./doc/statusmonitoring.png)
 
-![Web configuration interface](./doc/Web configuration interface.png)
+![Web configuration interface](./doc/Webconfiguration.png)
 
-![Web error log reminder](./doc/Web error log reminder.png)
+![Web error log reminder](./doc/reminder.png)
 
-![Operating system configuration interface](./doc/Operating system configuration interface.png)
+![Operating system configuration interface](./doc/configuration.png)
 
 ### Development environment required:
 centos7+php5.6+mysql5.6+apache+python2.7
