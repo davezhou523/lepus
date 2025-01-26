@@ -1,96 +1,105 @@
-Lepus系统监控OS性能、MySql、Oracle、MongoDB、Redis
-需要开发环境：
+### Lepus monitoring system:
+1. OS performance, MySql, Oracle, MongoDB, Redis <br>
+2. WEB process number, process memory monitoring, TCP connection number monitoring, PV, UV, IP value statistics, web error log timely reminder
+### Process
+![flow chart](./doc/flowChart.png)
+![Web_visit_statistics](./doc/Web_visit_statistics.png)
+![Web connection status monitoring](./doc/Web connection status monitoring.png)
+![Web configuration interface](./doc/Web configuration interface.png)
+![Web error log reminder](./doc/Web error log reminder.png)
+![Operating system configuration interface](./doc/Operating system configuration interface.png)
+### Development environment required:
 centos7+php5.6+mysql5.6+apache+python2.7
 
-二次开发新增:
-1、WEB进程数、进程内存监控、TCP连接数监控、PV、UV、IP值统计、web错误日志及时提醒
-2、升级操作系统配置界面、WEB配置界面,使用ztree树显示服务器节点、flexigrid表格显示服务器节点信息;后续全面替换
+### Sample configuration:
+Monitoring WEB server IP: 192.168.3.59 <br>
+Monitoring DB server IP: 192.168.3.60 <br>
+Scripts are stored in the directory: /data/www/ <br>
+Client IP: 192.168.3.15 <br>
+#### 1. Backend python configuration
+yum install -y python-devel MySQL-python python-paramiko mysql python2-pip <br>
+pip install redis <br>
+pip install redis-py-cluster <br>
+pip install cx_oracle pymongo pymssql <br>
 
-示例配置：
-监控WEB服务器IP:192.168.3.59
-监控DB服务器IP:192.168.3.60
-脚本存放在目录:/data/www/
-客户端IP：192.168.3.15
-一、后台python配置
-yum install -y  python-devel MySQL-python python-paramiko mysql python2-pip
-pip install redis
-pip install redis-py-cluster
-pip install cx_oracle pymongo pymssql
+Configure database IP, user, password path:
+cd /data/www/lepus/lepus/etc <br>
+1. cd /data/www/lepus/lepus <br>
 
-配置数据库IP、用户、密码路径:cd /data/www/lepus/lepus/etc
-1、cd /data/www/lepus/lepus
-vim lepus
-修改目录路径：basedir="/data/www/lepus/lepus" 
-2、启动
-./lepus start
+Modify directory path: basedir="/data/www/lepus/lepus" <br>
+2. Start <br>
+./lepus start <br>
 
-二、前端WEB配置
-cd /data/www/lepus/web/application/config
-配置config.php文件下 $config['base_url']     = 'http://xxxx/;
-配置database.php下连接db信息
+#### 2. Front-end WEB configuration <br>
+cd /data/www/lepus/web/application/config <br>
+Configure the config.php file $config['base_url'] = 'http://xxxx/; <br>
+Configure the database.php connection information <br>
 
-备注：
-登陆用户admin 密码123abc
-修改密码sql:
-UPDATE admin_user SET `password`=MD5('123ab') WHERE username='admin';
+Note:
+Login user admin password 123abc <br>
+Change password sql: <br>
+UPDATE admin_user SET `password`=MD5('123ab') WHERE username='admin'; <br>
 
-升级用户更新sql,只执行sql/update_web.sql
-全新用户更新sql顺序:sql/lepus_table.sql, lepus_data.sql , update_web.sql
+Upgrade user update sql, only execute sql/update_web.sql <br>
+New user update sql order: sql/lepus_table.sql, lepus_data.sql, update_web.sql <br>
 
-三、获得web服务器客户SSH秘钥
-由于获取web服务器访问日志、pv、uv信息，所以需要ssh密钥登陆
-在客户端192.168.3.15
-用ssh-keygen 的-f和-P参数，生成密钥不需要交互
-ssh-keygen -t rsa -f ~/.ssh/id_rsa -P ''
-cp ~/.ssh/id_rsa.pub   ~/.ssh/authorized_keys
-复制id_rsa内容界面：配置中心->操作系统->新增或修改对应主机下RSA框里
+#### 3. Obtain the web server client SSH key <br>
+Since the web server access log, pv, uv information is obtained, ssh key login is required <br>
+On the client 192.168.3.15 <br>
+Use the -f and -P parameters of ssh-keygen to generate keys without interaction <br>
+ssh-keygen -t rsa -f ~/.ssh/id_rsa -P '' <br>
+cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys <br>
+Copy id_rsa content interface: Configuration Center-> Operating System-> Add or modify the RSA box under the corresponding host <br>
 
-四、配置web日志、PV、IP、UV
-1、安装日志分隔工具：yum install -y cronolog
+#### 4. Configure web logs, PV, IP, UV
+1. Install the log separation tool: yum install -y cronolog <br>
 
-2、apache日志格式：
+2. Apache log format: <br>
 
-添加UV值
+Add UV value
 vim httpd.conf
-启用mod_usertrack模块
-LoadModule usertrack_module libexec/mod_usertrack.so
+Enable mod_usertrack module <br>
+```LoadModule usertrack_module libexec/mod_usertrack.so
 <IfModule usertrack_module>
-CookieExpires “1 weeks”
+CookieExpires "1 weeks"
 CookieStyle cookie
 CookieName your_cookie_name
 CookieTracking on
 </IfModule>
+```
 
-访问日志中记录真实的客户 IP 地址
-SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
-在日志LogFormat最后增加%{cookie}n字段
-LogFormat "%{X-Forwarded-For}i %{cookie}n %{%Y-%m-%d %H:%m:%S}t %r %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" common
-X-Forwarded-For 客户端IP
-cookie 是指UV值 
-%Y-%m-%d %H:%m:%S 访问日期时间
-%r 请求的行对应格式为”%m %U%q %H”，即”请求方法/访问路径/协议”
-注意：日志格式顺序与参数不要变动，否则你需要更改/data/www/lepus/lepus/check_web_log.sh 脚本文件；
-当然还得修改check_web_log.sh脚本排除web访问的非动态URL，如css、image、upfile目录
+Record the real client IP address in the access log <br>
+SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded <br>
+Add the %{cookie}n field at the end of the log LogFormat <br>
+LogFormat "%{X-Forwarded-For}i %{cookie}n %{%Y-%m-%d %H:%m:%S}t %r %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" common <br>
+X-Forwarded-For Client IP <br>
+Cookie refers to UV value <br>
+%Y-%m-%d %H:%m:%S Access date and time <br>
+%r The corresponding format of the requested line is "%m %U%q %H", that is, "request method/access path/protocol" <br>
+Note: Do not change the order and parameters of the log format, otherwise you need to change the /data/www/lepus/lepus/check_web_log.sh script file;
+Of course, you also need to modify the check_web_log.sh script to exclude non-dynamic URLs for web access, such as css, image, and upfile directories
+<br>
+Configure web access log format: <br>
 
-配置web访问日志格式：
+CustomLog "|/usr/sbin/cronolog /data/server/httpd/logs/xx.com-access_%Y%m%d.log" common env=forwarded <br>
+xx.com-access_%Y%m%d.log is separated by day %Y%m%d, corresponding interface: Configuration Center->Operating System->Add or modify the corresponding "Access Log Rules" <br>
 
-CustomLog "|/usr/sbin/cronolog /data/server/httpd/logs/xx.com-access_%Y%m%d.log" common env=forwarded
-xx.com-access_%Y%m%d.log按天分隔%Y%m%d,对应界面:配置中心->操作系统->新增或修改对应“访问日志规则”
-
-3、nginx 日志格式配置
-nginx 添加uv
+3. nginx log format configuration <br>
+nginx add uv <br>
+```
 http {
-     log_format  main  '$http_x_forwarded_for $uid $http_x_cookie $time_iso8601 $request $remote_addr - $remote_user [$time_local] "$request" $st
+log_format main '$http_x_forwarded_for $uid $http_x_cookie $time_iso8601 $request $remote_addr - $remote_user [$time_local] "$request" $st
 atus $body_bytes_sent "$http_referer" "$http_user_agent" "$http_x_forwarded_for"';
 }
 
 server {
-        set $uid "-";
-        if ( $http_cookie ~* "uid=(\S+)(;.*|$)")
-        {
-                set $uid $1;
-        }
+set $uid "-";
+if ( $http_cookie ~* "uid=(\S+)(;.*|$)")
+{
+set $uid $1;
 }
-注意：日志格式顺序与参数不要变动，否则你需要更改/data/www/lepus/lepus/check_nginx_web_log.sh  脚本文件；
+}
+```
+Note: Do not change the log format order and parameters, otherwise you need to change the /data/www/lepus/lepus/check_nginx_web_log.sh script file; <br>
 
-如需要帮助请加QQ:271416962
+If you need help, please add wechat: 271416962
