@@ -1,6 +1,6 @@
 ### Lepus monitoring system:
-1. OS performance, MySql, Oracle, MongoDB, Redis <br>
-2. WEB process number, process memory monitoring, TCP connection number monitoring, PV, UV, IP value statistics, web error log timely reminder
+**1. OS performance, MySql, Oracle, MongoDB, Redis <br>**
+**2. WEB process number, process memory monitoring, TCP connection number monitoring, PV, UV, IP value statistics, web error log timely reminder**
 ### Process
 ![flow chart](./doc/flowChart.png)
 ![Web_visit_statistics](./doc/Web_visit_statistics.png)
